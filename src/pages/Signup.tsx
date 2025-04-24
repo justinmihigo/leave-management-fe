@@ -27,6 +27,11 @@ const Signup: React.FC = () => {
     e.preventDefault();
     setError('');
 
+    if (!formData.email.endsWith('@ist.com')) {
+      setError('Email must be from the @ist.com domain');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -37,7 +42,11 @@ const Signup: React.FC = () => {
     try {
       await emailSignup(formData.name, formData.email, formData.password);
     } catch (error) {
-      setError('Failed to create account');
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Failed to create account');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -114,4 +123,4 @@ const Signup: React.FC = () => {
   );
 };
 
-export default Signup; 
+export default Signup;

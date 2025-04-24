@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAuth } from '../auth/AuthContext';
-import { LeaveRequest, LeaveBalance, PublicHoliday, User, LeaveStatus } from '../types';
+import { LeaveRequest, LeaveBalance, PublicHoliday, User} from '../types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 

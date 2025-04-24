@@ -70,6 +70,7 @@ const AdminDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       await Promise.all([fetchUsers(), fetchLeaves()]);
+      console.log(loading)
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to fetch dashboard data');

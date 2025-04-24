@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -190,19 +190,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [token, user]);
 
+  const value = useMemo(() => ({ 
+    user, 
+    isAuthenticated,
+    token,
+    emailLogin,
+    emailSignup,
+    logout,
+    applyForLeave,
+    getUserLeaves
+  }), [user, isAuthenticated, token]);
+
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        isAuthenticated,
-        token,
-        emailLogin,
-        emailSignup,
-        logout,
-        applyForLeave,
-        getUserLeaves
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -214,4 +214,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};

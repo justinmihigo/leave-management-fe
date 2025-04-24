@@ -158,7 +158,15 @@ const TeamCalendar: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-4">
                             <div>
-                              <p className="font-medium">{leave.user?.name || leave.userId}</p>
+                              {(() => {
+                                let userName;
+                                if (leave.user?.name) {
+                                  userName = leave.user.name;
+                                } else {
+                                  userName = leave.userId;
+                                }
+                                return <p className="font-medium">{userName}</p>;
+                              })()}
                               <p className="text-sm text-gray-500">
                                 {formatDate(leave.startDate)} - {formatDate(leave.endDate)}
                               </p>

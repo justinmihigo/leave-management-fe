@@ -3,7 +3,6 @@ import { Link, useHistory } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { LogIn } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
 const Login: React.FC = () => {
@@ -22,6 +21,12 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.email.endsWith('@ist.com')) {
+      setError('Email must be from the @ist.com domain');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -82,4 +87,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login; 
+export default Login;
