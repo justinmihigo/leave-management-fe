@@ -9,6 +9,9 @@ import {
   Calendar,
   UserCog,
   FilePieChart,
+  Home,
+  Settings,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { toast } from 'react-toastify';
@@ -22,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import { Link } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -247,299 +251,357 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-
-      {/* Leaves Table */}
-      <Card className="mt-6 mb-6">
-        <CardHeader>
-          <CardTitle>Recent Leave Requests</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leaves.map((leave) => (
-                <TableRow key={leave.id}>
-                  <TableCell>{leave.userName}</TableCell>
-                  <TableCell>{leave.leaveType}</TableCell>
-                  <TableCell>{new Date(leave.startDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(leave.endDate).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-sm ${
-                      leave.status === 'Approved' ? 'bg-green-100 text-green-800' : leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :'bg-red-100 text-red-800'
-                    }`}>
-                      {leave.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{leave.reason}</TableCell>
-                  <TableCell>
-                    {leave.status === 'Pending' && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedLeave(leave)}
-                          >
-                            Take Action
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Take Action on Leave</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <p>
-                              <strong>Employee:</strong> {leave.userName}
-                            </p>
-                            <p>
-                              <strong>Leave Type:</strong> {leave.leaveType}
-                            </p>
-                            <p>
-                              <strong>Reason:</strong> {leave.reason}
-                            </p>
-                            <Input
-                              type="text"
-                              placeholder="Add comments"
-                              value={comment}
-                              onChange={(e) => setComment(e.target.value)}
-                            />
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => handleAction('Approved')}
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => handleAction('Rejected')}
-                              >
-                                Reject
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Users Management Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Users Management
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Button
-                onClick={() => exportData('users', 'csv')}
-                className="w-full flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Export Users (CSV)
-              </Button>
-              <Button
-                onClick={() => exportData('users', 'excel')}
-                className="w-full flex items-center gap-2"
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                Export Users (Excel)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Leave Management Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Leave Management
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Button
-                onClick={() => exportData('leaves', 'csv')}
-                className="w-full flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Export Leaves (CSV)
-              </Button>
-              <Button
-                onClick={() => exportData('leaves', 'excel')}
-                className="w-full flex items-center gap-2"
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                Export Leaves (Excel)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Reports Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FilePieChart className="h-5 w-5" />
-              Reports
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Select
-                  value={selectedDepartment}
-                  onValueChange={setSelectedDepartment}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IT">IT</SelectItem>
-                    <SelectItem value="HR">HR</SelectItem>
-                    <SelectItem value="Finance">Finance</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() => generateReport('department', selectedDepartment)}
-                  className="w-full mt-2"
-                  disabled={!selectedDepartment}
-                >
-                  Generate Department Report
-                </Button>
-              </div>
-
-              <div>
-                <Select
-                  value={selectedLeaveType}
-                  onValueChange={setSelectedLeaveType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Leave Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ANNUAL">Annual Leave</SelectItem>
-                    <SelectItem value="SICK">Sick Leave</SelectItem>
-                    <SelectItem value="UNPAID">Unpaid Leave</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() => generateReport('leave-type', selectedLeaveType)}
-                  className="w-full mt-2"
-                  disabled={!selectedLeaveType}
-                >
-                  Generate Leave Type Report
-                </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm">
+        <div className="container mx-auto px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <Link to="/dashboard" className="flex items-center space-x-2">
+                <Home className="h-5 w-5" />
+                <span className="font-semibold">Dashboard</span>
+              </Link>
+              <div className="hidden md:flex items-center space-x-6">
+                <Link to="/users" className="text-gray-600 hover:text-gray-900">
+                  <Users className="h-5 w-5" />
+                </Link>
+                <Link to="/team-calendar" className="text-gray-600 hover:text-gray-900">
+                  <Calendar className="h-5 w-5" />
+                </Link>
+                <Link to="/leave/history" className="text-gray-600 hover:text-gray-900">
+                  <FileText className="h-5 w-5" />
+                </Link>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Leave Balance Adjustment Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCog className="h-5 w-5" />
-              Leave Balance Adjustment
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Select
-                value={selectedUser?.id}
-                onValueChange={(value) => setSelectedUser(users.find(u => u.id === value) || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select User" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map(user => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Input
-                type="number"
-                placeholder="Adjustment amount"
-                value={leaveBalanceAdjustment}
-                onChange={(e) => setLeaveBalanceAdjustment(Number(e.target.value))}
-              />
-              
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
               <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
-                  if (selectedUser) {
-                    adjustLeaveBalance(selectedUser.id, leaveBalanceAdjustment);
-                  }
+                  // Add logout logic here
+                  history.push('/login');
                 }}
-                className="w-full"
-                disabled={!selectedUser || leaveBalanceAdjustment === 0}
+                className="flex items-center space-x-2"
               >
-                Adjust Balance
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </Button>
             </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden bg-white shadow-sm">
+        <div className="container mx-auto px-6 py-2">
+          <div className="flex items-center justify-around">
+            <Link to="/users" className="p-2 text-gray-600 hover:text-gray-900">
+              <Users className="h-5 w-5" />
+            </Link>
+            <Link to="/team-calendar" className="p-2 text-gray-600 hover:text-gray-900">
+              <Calendar className="h-5 w-5" />
+            </Link>
+            <Link to="/leave/history" className="p-2 text-gray-600 hover:text-gray-900">
+              <FileText className="h-5 w-5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+
+        {/* Leaves Table */}
+        <Card className="mt-6 mb-6">
+          <CardHeader>
+            <CardTitle>Recent Leave Requests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leaves.map((leave) => (
+                  <TableRow key={leave.id}>
+                    <TableCell>{leave.userName}</TableCell>
+                    <TableCell>{leave.leaveType}</TableCell>
+                    <TableCell>{new Date(leave.startDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(leave.endDate).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-sm ${
+                        leave.status === 'Approved' ? 'bg-green-100 text-green-800' : leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :'bg-red-100 text-red-800'
+                      }`}>
+                        {leave.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>{leave.reason}</TableCell>
+                    <TableCell>
+                      {leave.status === 'Pending' && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedLeave(leave)}
+                            >
+                              Take Action
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Take Action on Leave</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <p>
+                                <strong>Employee:</strong> {leave.userName}
+                              </p>
+                              <p>
+                                <strong>Leave Type:</strong> {leave.leaveType}
+                              </p>
+                              <p>
+                                <strong>Reason:</strong> {leave.reason}
+                              </p>
+                              <Input
+                                type="text"
+                                placeholder="Add comments"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                              />
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleAction('Approved')}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleAction('Rejected')}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Users Management Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Users Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => exportData('users', 'csv')}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Export Users (CSV)
+                </Button>
+                <Button
+                  onClick={() => exportData('users', 'excel')}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Export Users (Excel)
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Leave Management Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Leave Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => exportData('leaves', 'csv')}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Export Leaves (CSV)
+                </Button>
+                <Button
+                  onClick={() => exportData('leaves', 'excel')}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Export Leaves (Excel)
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reports Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FilePieChart className="h-5 w-5" />
+                Reports
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Select
+                    value={selectedDepartment}
+                    onValueChange={setSelectedDepartment}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="IT">IT</SelectItem>
+                      <SelectItem value="HR">HR</SelectItem>
+                      <SelectItem value="Finance">Finance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={() => generateReport('department', selectedDepartment)}
+                    className="w-full mt-2"
+                    disabled={!selectedDepartment}
+                  >
+                    Generate Department Report
+                  </Button>
+                </div>
+
+                <div>
+                  <Select
+                    value={selectedLeaveType}
+                    onValueChange={setSelectedLeaveType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Leave Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ANNUAL">Annual Leave</SelectItem>
+                      <SelectItem value="SICK">Sick Leave</SelectItem>
+                      <SelectItem value="UNPAID">Unpaid Leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={() => generateReport('leave-type', selectedLeaveType)}
+                    className="w-full mt-2"
+                    disabled={!selectedLeaveType}
+                  >
+                    Generate Leave Type Report
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Leave Balance Adjustment Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCog className="h-5 w-5" />
+                Leave Balance Adjustment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Select
+                  value={selectedUser?.id}
+                  onValueChange={(value) => setSelectedUser(users.find(u => u.id === value) || null)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select User" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Input
+                  type="number"
+                  placeholder="Adjustment amount"
+                  value={leaveBalanceAdjustment}
+                  onChange={(e) => setLeaveBalanceAdjustment(Number(e.target.value))}
+                />
+                
+                <Button
+                  onClick={() => {
+                    if (selectedUser) {
+                      adjustLeaveBalance(selectedUser.id, leaveBalanceAdjustment);
+                    }
+                  }}
+                  className="w-full"
+                  disabled={!selectedUser || leaveBalanceAdjustment === 0}
+                >
+                  Adjust Balance
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Users Table */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Leave Balance</TableHead>
+                  <TableHead>Sick Leave Balance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.department}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell>{user.leaveBalance}</TableCell>
+                    <TableCell>{user.sickLeaveBalance}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
-
-      {/* Users Table */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Leave Balance</TableHead>
-                <TableHead>Sick Leave Balance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.department}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.leaveBalance}</TableCell>
-                  <TableCell>{user.sickLeaveBalance}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      
     </div>
   );
 };

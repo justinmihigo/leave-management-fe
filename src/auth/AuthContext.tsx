@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        setIsAuthenticated(true);
       } else {
         throw new Error('Failed to fetch user details');
       }
@@ -124,8 +125,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const { token, userId } = await response.json();
         setToken(token);
-        setIsAuthenticated(true);
-        // Fetch complete user details using the userId
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
         await fetchUserDetails(userId, token);
       } else {
         throw new Error('Login failed');
@@ -149,8 +150,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const { token, userId } = await response.json();
         setToken(token);
-        setIsAuthenticated(true);
-        // Fetch complete user details using the userId
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
         await fetchUserDetails(userId, token);
       } else {
         throw new Error('Signup failed');
@@ -165,6 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
   };
 
   // Check for existing token and user data on mount
@@ -174,21 +177,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (storedToken && storedUserId) {
       setToken(storedToken);
-      setIsAuthenticated(true);
-      fetchUserDetails(storedUserId, storedToken);
+      fetchUserDetails(storedUserId, storedToken).catch(() => {
+        // If there's an error fetching user details, clear the stored data
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        setToken(null);
+        setUser(null);
+        setIsAuthenticated(false);
+      });
     }
   }, []);
-
-  // Store token and userId in localStorage when they change
-  useEffect(() => {
-    if (token && user?.id) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('userId', user.id);
-    } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-    }
-  }, [token, user]);
 
   const value = useMemo(() => ({ 
     user, 
