@@ -10,7 +10,6 @@ import {
   UserCog,
   FilePieChart,
   Home,
-  Settings,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
